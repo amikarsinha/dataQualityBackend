@@ -87,6 +87,11 @@ def handle_exception(e):
     }
     return jsonify(response), 500
 
+@app.route('/', methods=['GET'])
+def test():
+    app.logger.info("Home route accessed")
+    return jsonify(message="Hello, Azure!", status="success")
+
 # Endpoint to add a new rule
 @app.route('/api/rules', methods=['POST'])
 def add_rule():
