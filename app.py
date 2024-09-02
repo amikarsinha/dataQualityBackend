@@ -233,7 +233,7 @@ def data_profiling():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# get all exception records
+# get all exception recordss
 @app.route('/api/executeRules', methods=['GET'])
 def get_all_rules_ExecuteRules():
     try:
