@@ -9,7 +9,7 @@ import pyodbc
 from sqlalchemy import create_engine, inspect
 import urllib
 import pandas as pd
-
+import logging
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -20,6 +20,11 @@ CORS(app)
 # DATABASE_URI = 'mysql+pymysql://root:admin@localhost:3306/exception_database'
 # DATABASE_URI = os.getenv("DATABASE_URI")
 # engine = create_engine(DATABASE_URI)
+
+
+# logging config
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 # Azure Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -170,6 +175,7 @@ def delete_rule(exception_id):
 @app.route('/api/rules', methods=['GET'])
 def get_all_rules():
     try:
+        app.logger.info("Exception record api accessed")
         rules = session.query(ExceptionRule).all()
         return jsonify([{
             "table_id": rule.table_id,
@@ -195,6 +201,7 @@ def get_all_rules():
 @app.route('/api/dataProfiling', methods=['GET'])
 def data_profiling():
     try:
+        app.logger.info("Data Profiling api accessed")
         table_name = 'realpolicyclaims'
         
         # Load the data into a DataFrame
@@ -315,6 +322,7 @@ def execute_rule():
 @app.route('/api/exception_results', methods=['GET'])
 def get_all_exception_results():
     try:
+        app.logger.info("Exception Results api accessed")
         # Query all records from the exception_result table
         results = session.query(ExceptionResult).all()
 
@@ -494,6 +502,6 @@ def get_line_chart_data():
 if __name__ == '__main__':
     # Create the database and tables if they don't exist
     Base.metadata.create_all(engine_azure)
-    
+    app.logger.info("app started..")
     # Run the Flask app on port 5000 (or any port you prefer)
     app.run(debug=True, port=5000)
