@@ -9,6 +9,7 @@ import pyodbc
 from sqlalchemy import create_engine, inspect
 import urllib
 import pandas as pd
+
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -27,7 +28,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 params = urllib.parse.quote_plus(DATABASE_URL)
 conn_str = 'mssql+pyodbc:///?odbc_connect={}'.format(params)
 
-# Create the engine
+# Create the azure engine
 engine_azure = create_engine(conn_str, echo=True)
 
 Base = declarative_base()
