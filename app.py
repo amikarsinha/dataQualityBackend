@@ -5,6 +5,10 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from datetime import datetime
 from flask_cors import CORS
 import pandas as pd
+import pyodbc
+from sqlalchemy import create_engine, inspect
+import urllib
+import pandas as pd
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -12,9 +16,20 @@ app = Flask(__name__)
 CORS(app)
 
 # Database configuration
-#DATABASE_URI = 'mysql+pymysql://root:admin@localhost:3306/exception_database'
-DATABASE_URI = os.getenv("DATABASE_URI")
-engine = create_engine(DATABASE_URI)
+# DATABASE_URI = 'mysql+pymysql://root:admin@localhost:3306/exception_database'
+# DATABASE_URI = os.getenv("DATABASE_URI")
+# engine = create_engine(DATABASE_URI)
+
+# Azure Database configuration
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Define the connection string
+params = urllib.parse.quote_plus(DATABASE_URL)
+conn_str = 'mssql+pyodbc:///?odbc_connect={}'.format(params)
+
+# Create the engine
+engine_azure = create_engine(conn_str, echo=True)
+
 Base = declarative_base()
 
 # Define a model for the table
@@ -55,7 +70,7 @@ class ExceptionResult(Base):
 
 
 # Create the session
-Session = scoped_session(sessionmaker(bind=engine))
+Session = scoped_session(sessionmaker(bind=engine_azure))
 session = Session()
 
 # Custom error handler to ensure JSON response
@@ -182,7 +197,7 @@ def data_profiling():
         table_name = 'realpolicyclaims'
         
         # Load the data into a DataFrame
-        df = pd.read_sql_table(table_name, engine)
+        df = pd.read_sql_table(table_name, engine_azure)
         
         # Describe the dataframe
         table_data = []
@@ -260,7 +275,7 @@ def execute_rule():
                 return jsonify({"error": "Both 'exception_id' and 'logic' are required in each item"}), 400
 
             # Execute the SQL command
-            result_df = pd.read_sql_query(f'SELECT * FROM realpolicyclaims WHERE {logic}', engine)
+            result_df = pd.read_sql_query(f'SELECT * FROM realpolicyclaims WHERE {logic}', engine_azure)
 
             # Iterate through the result dataframe and store each result
             for _, row in result_df.iterrows():
@@ -477,7 +492,7 @@ def get_line_chart_data():
     return jsonify(result)
 if __name__ == '__main__':
     # Create the database and tables if they don't exist
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine_azure)
     
     # Run the Flask app on port 5000 (or any port you prefer)
     app.run(debug=True, port=5000)
