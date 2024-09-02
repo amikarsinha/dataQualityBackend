@@ -502,6 +502,6 @@ def get_line_chart_data():
 if __name__ == '__main__':
     # Create the database and tables if they don't exist
     Base.metadata.create_all(engine_azure)
-    app.logger.info("app started..")
+    app.logger.info("app started...")
     # Run the Flask app on port 5000 (or any port you prefer)
     app.run(debug=True, port=5000)
